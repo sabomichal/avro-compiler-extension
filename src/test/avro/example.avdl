@@ -1,0 +1,23 @@
+/**
+ * An example protocol in Avro IDL
+ */
+@namespace("org.apache.avro.test")
+protocol Simple {
+
+  @java-interface("TestInterface")
+  record Record1 {
+    string name;
+    long value;
+  }
+
+  @java-interface("TestInterface")
+  record Record2 {
+    string name;
+    boolean value;
+  }
+
+  record Protocol {
+    @java-type("TestInterface")
+    union { Record1, Record2 } payload;
+  }
+}
