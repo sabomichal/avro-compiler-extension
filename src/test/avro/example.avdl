@@ -1,23 +1,22 @@
 /**
  * An example protocol in Avro IDL
  */
-@namespace("org.apache.avro.test")
+@namespace("com.github.sabomichal.avroextensions")
 protocol Simple {
 
-  @java-interface("TestInterface")
-  record Record1 {
+  @java-interface("com.github.sabomichal.avroextensions.State")
+  record StateA {
     string name;
     long value;
   }
 
-  @java-interface("TestInterface")
-  record Record2 {
+  @java-interface("com.github.sabomichal.avroextensions.State")
+  record StateB {
     string name;
     boolean value;
   }
 
-  record Protocol {
-    @java-type("TestInterface")
-    union { Record1, Record2 } payload;
+  record Record {
+    union { StateA, StateB } state;
   }
 }
