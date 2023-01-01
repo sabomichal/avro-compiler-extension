@@ -16,6 +16,21 @@ The extension provides following custom annotations. Please see the examples for
 
 #### @java-interface
 The '@java-interface' annotation makes the given record implement the comma separated list of interfaces. 
+```idl
+  @java-interface("com.example.State")
+  record StateA {
+    string name;
+  }
+```
+
+#### @java-final
+The '@java-final' annotation makes the given record a final class. This is particularly useful when used in conjunction with sealed interfaces.
+```idl
+  @java-final("")
+  record StateA {
+    string name;
+  }
+```
 
 ### Usage
 #### Maven
