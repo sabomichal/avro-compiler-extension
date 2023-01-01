@@ -1,48 +1,46 @@
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.sabomichal/immutable-xjc-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.sabomichal/immutable-xjc-plugin) ![Java CI with Maven](https://github.com/sabomichal/immutable-xjc/workflows/Java%20CI%20with%20Maven/badge.svg)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.sabomichal/avro-compiler-extension/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.sabomichal/avro-compiler-extension) ![Java CI with Maven](https://github.com/sabomichal/avro-compiler-extension/workflows/Java%20CI%20with%20Maven/badge.svg)
 ## avro-compiler-extension
 avro-compiler-extension is an Avro IDL to Java _SpecificCompiler_ extension adding custom IDL annotations, specifically:
 
-* @java-interface type annotation, making given 
+* @java-interface type annotation, making given record implementing the specified Java interface
+* generated UNION types are no longer automatically generated with Java Object type, but the UNION types common Java interface  
 
 ### Avro version
-Plugin is built against Avro 1.11.1
+Extension is compatible with Avro 1.11.x
 
 ### Java version
 Target Java versions is 11
 
-### Options provided by the extension
-The plugin provides an '-immutable' option which is enabled by adding its jar file to the XJC classpath. When enabled, additional options can be used to control the behavior of the plugin. See the examples for further information.
+### Annotations provided by the extension
+The extension provides following custom annotations. Please see the examples for further information.
 
-#### -immutable
-The '-immutable' option enables the plugin making the XJC generated classes immutable.
+#### @java-interface
+The '@java-interface' annotation makes the given record implement the comma separated list of interfaces. 
 
 ### Usage
 #### Maven
-Maven users simply add the IMMUTABLE-XJC plugin as a dependency to a JAXB plugin of choice. The following example demonstrates the use of the IMMUTABLE-XJC plugin with the mojo *https://github.com/evolvedbinary/jvnet-jaxb-maven-plugin*.
+Maven users simply add the avro-compiler-extension extension as a dependency to avro-maven-plugin and set new Velocity template directory and tools class. The following example demonstrates the usage.
 ```xml
 <plugin>
-    <groupId>com.evolvedbinary.maven.jvnet</groupId>
-    <artifactId>jaxb30-maven-plugin</artifactId>
-    <version>0.15.0</version>
+    <groupId>org.apache.avro</groupId>
+    <artifactId>avro-maven-plugin</artifactId>
+    <version>${avro.version}</version>
     <dependencies>
         <dependency>
             <groupId>com.github.sabomichal</groupId>
-            <artifactId>immutable-xjc-plugin</artifactId>
-            <version>1.8.0</version>
+            <artifactId>avro-compiler-extension</artifactId>
+            <version>${avro.compiler.extension.version}</version>
         </dependency>
     </dependencies>
     <executions>
         <execution>
-            <phase>generate-sources</phase>
             <goals>
-                <goal>generate</goal>
+                <goal>idl-protocol</goal>
             </goals>
             <configuration>
-                <specVersion>4.0.0</specVersion>
-                <args>
-                    <arg>-immutable</arg>
-                    <arg>-imm-builder</arg>
-                </args>
+                <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
+                <templateDirectory>${project.basedir}/src/main/resources/velocity/</templateDirectory>
+                <velocityToolsClassesNames>com.github.sabomichal.avroextensions.AvroGeneratorExtensions</velocityToolsClassesNames>
             </configuration>
         </execution>
     </executions>
@@ -51,6 +49,6 @@ Maven users simply add the IMMUTABLE-XJC plugin as a dependency to a JAXB plugin
 
 ### Release notes
 #### 0.1
-* builder class now contains initialised collection fields
+* first initial version
 
 If you like it, give it a star, if you don't, write an issue.
