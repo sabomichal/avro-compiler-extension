@@ -10,10 +10,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <maven.test.skip>true</maven.test.skip>
         <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.release.selftest>17</maven.compiler.release.selftest>
         <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
         <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
+        <maven.test.skip>true</maven.test.skip>
 
         <avro.version>1.11.1</avro.version>
         <junit.version>5.9.1</junit.version>
@@ -173,6 +174,7 @@
             <id>selftest</id>
             <properties>
                 <maven.test.skip>false</maven.test.skip>
+                <maven.compiler.release>${maven.compiler.release.selftest}</maven.compiler.release>
             </properties>
             <build>
                 <plugins>
@@ -195,11 +197,15 @@
                                 </goals>
                                 <configuration>
                                     <sourceDirectory>${project.basedir}/src/test/avro/</sourceDirectory>
-                                    <outputDirectory>${project.build.directory}/generated-test-sources/avro</outputDirectory>
-                                    <templateDirectory>${project.basedir}/src/main/resources/velocity/</templateDirectory>
+                                    <outputDirectory>${project.build.directory}/generated-test-sources/avro
+                                    </outputDirectory>
+                                    <templateDirectory>${project.basedir}/src/main/resources/velocity/
+                                    </templateDirectory>
                                     <stringType>String</stringType>
                                     <fieldVisibility>private</fieldVisibility>
-                                    <velocityToolsClassesNames>com.github.sabomichal.avroextensions.AvroGeneratorExtensions</velocityToolsClassesNames>
+                                    <velocityToolsClassesNames>
+                                        com.github.sabomichal.avroextensions.AvroGeneratorExtensions
+                                    </velocityToolsClassesNames>
                                     <gettersReturnOptional>true</gettersReturnOptional>
                                     <optionalGettersForNullableFieldsOnly>true</optionalGettersForNullableFieldsOnly>
                                 </configuration>

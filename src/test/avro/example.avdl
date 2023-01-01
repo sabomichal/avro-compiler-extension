@@ -4,12 +4,14 @@
 @namespace("com.github.sabomichal.avroextensions")
 protocol Simple {
 
+  @java-final("")
   @java-interface("com.github.sabomichal.avroextensions.State")
   record StateA {
     string name;
     long value;
   }
 
+  @java-final("")
   @java-interface("com.github.sabomichal.avroextensions.State")
   record StateB {
     string name;

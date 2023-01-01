@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 public class AvroGeneratorExtensions {
 
     public static final String PROP_NAME_JAVA_INTERFACE = "java-interface";
+    public static final String PROP_NAME_JAVA_FINAL = "java-final";
+
     public static final String DEFAULT_INTERFACE = SpecificRecord.class.getName();
 
     public String recordImplements(Schema schema) {
@@ -18,6 +20,10 @@ public class AvroGeneratorExtensions {
         interfaces.add(DEFAULT_INTERFACE);
         interfaces.addAll(customInterfaces);
         return String.join(", ", interfaces);
+    }
+
+    public boolean recordFinal(Schema schema) {
+        return javaFinal(schema);
     }
 
     public String javaType(SpecificCompiler delegate, Schema schema) {
@@ -53,6 +59,11 @@ public class AvroGeneratorExtensions {
         return Optional.ofNullable(schema.getProp(PROP_NAME_JAVA_INTERFACE))
                 .map(p -> Arrays.asList(p.split("\\s,\\s")))
                 .orElse(List.of());
+    }
+
+    private boolean javaFinal(Schema schema) {
+        return Optional.ofNullable(schema.getProp(PROP_NAME_JAVA_FINAL))
+                .isPresent();
     }
 
     private boolean isUnionType(Schema schema) {
