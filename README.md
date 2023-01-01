@@ -1,6 +1,6 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.sabomichal/immutable-xjc-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.sabomichal/immutable-xjc-plugin) ![Java CI with Maven](https://github.com/sabomichal/immutable-xjc/workflows/Java%20CI%20with%20Maven/badge.svg)
-## immutable-xjc
-Avroextensions is an _avro-maven-plugin_ plugin extension adding custom IDL annotations, specifically:
+## avro-compiler-extension
+avro-compiler-extension is an Avro IDL to Java _SpecificCompiler_ extension adding custom IDL annotations, specifically:
 
 * @java-interface type annotation, making given 
 
