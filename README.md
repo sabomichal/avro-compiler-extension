@@ -66,4 +66,4 @@ Maven users simply add the avro-compiler-extension extension as a dependency to 
 #### 0.1
 * first initial version
 
-If you like it, give it a star, if you don't, write an issue.
+If you like it, give it a star, if you don't, please write an issue.

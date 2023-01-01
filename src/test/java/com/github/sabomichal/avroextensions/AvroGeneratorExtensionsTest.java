@@ -1,5 +1,6 @@
 package com.github.sabomichal.avroextensions;
 
+import com.example.*;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.file.SeekableByteArrayInput;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,29 +18,26 @@ public class AvroGeneratorExtensionsTest {
 
     @Test
     public void testMarshalUnmarshal() throws IOException {
-        var stateA = StateA.newBuilder()
+        State stateA = StateA.newBuilder()
                 .setName("stateA")
                 .setValue(1)
                 .build();
 
-        var stateB = StateB.newBuilder()
+        State stateB = StateB.newBuilder()
                 .setName("stateB")
                 .setValue(true)
                 .build();
 
         var recordA1 = RecordA.newBuilder()
                 .setState(stateA)
-                .setErrorType(null)
+                .setPayload(null)
                 .build();
 
         var recordA2 = RecordA.newBuilder()
                 .setState(stateB)
-                .setErrorTypeBuilder(Error.newBuilder().setMessage("message"))
-                .build();
-
-        var recordB = RecordB.newBuilder()
-                .setState(null)
-                .setErrorTypeBuilder(Error.newBuilder().setMessage("message"))
+                .setPayload(MessagePayload.newBuilder()
+                        .setMessage("message")
+                        .build())
                 .build();
 
         // marshal
@@ -51,10 +50,9 @@ public class AvroGeneratorExtensionsTest {
         dataFileWriter.close();
 
         // unmarshal
+        var v = new PrintingVisitor();
         var datumReader = new SpecificDatumReader<>(RecordA.class);
         var bis = new SeekableByteArrayInput(bos.toByteArray());
-
-        var v = new PrintingVisitor();
 
         try (var dataFileReader = new DataFileReader<>(bis, datumReader)) {
             assertTrue(dataFileReader.hasNext());
@@ -71,7 +69,29 @@ public class AvroGeneratorExtensionsTest {
         }
     }
 
-    private class PrintingVisitor implements Visitor {
+    @Test
+    public void testOptionalGettersSettersCorrectType() {
+        State state = StateA.newBuilder()
+                .setName("state")
+                .setValue(1)
+                .build();
+
+        var recordB1 = RecordB.newBuilder()
+                .setState(null)
+                .setPayloadBuilder(MessagePayload.newBuilder().setMessage("message"))
+                .build();
+        Optional<State> expectedB1 = Optional.empty();
+        assertEquals(expectedB1, recordB1.getState());
+
+        var recordB2 = RecordB.newBuilder()
+                .setState(state)
+                .setPayloadBuilder(MessagePayload.newBuilder().setMessage("message"))
+                .build();
+        Optional<State> expectedB2 = Optional.of(state);
+        assertEquals(expectedB2, recordB2.getState());
+    }
+
+    private static class PrintingVisitor implements Visitor {
 
         @Override
         public void visit(StateA state) {

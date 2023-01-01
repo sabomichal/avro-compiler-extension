@@ -1,4 +1,4 @@
-package com.github.sabomichal.avroextensions;
+package com.example;
 
 import java.util.Optional;
 

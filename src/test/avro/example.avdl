@@ -1,35 +1,35 @@
 /**
  * An example protocol in Avro IDL
  */
-@namespace("com.github.sabomichal.avroextensions")
+@namespace("com.example")
 protocol Simple {
 
   @java-final("")
-  @java-interface("com.github.sabomichal.avroextensions.State")
+  @java-interface("com.example.State")
   record StateA {
     string name;
     long value;
   }
 
   @java-final("")
-  @java-interface("com.github.sabomichal.avroextensions.State")
+  @java-interface("com.example.State")
   record StateB {
     string name;
     boolean value;
   }
 
-  @java-interface("com.github.sabomichal.avroextensions.ErrorState")
-  record Error {
+  @java-interface("com.example.Payload")
+  record MessagePayload {
     string message;
   }
 
   record RecordA {
     union { StateA, StateB } state;
-    Error? errorType;
+    MessagePayload? payload;
   }
 
   record RecordB {
     union { null, StateA, StateB } state;
-    Error errorType;
+    MessagePayload payload;
   }
 }
