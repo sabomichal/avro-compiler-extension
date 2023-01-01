@@ -21,9 +21,11 @@ public class AvroGeneratorExtensions {
     }
 
     public String javaType(SpecificCompiler delegate, Schema schema) {
-        if (schema.getType() == Schema.Type.UNION) {
-            // get types of union and find implementing interfaces 
+        // process all union types and skip optional types (defined as union of that type and NULL type)
+        if (isUnionType(schema) && !isOptionalType(schema)) {
+            // get types of union and find implementing interfaces
             var interfaces = schema.getTypes().stream()
+                    .filter(t -> t.getType() != Schema.Type.NULL)
                     .map(this::javaInterfaces)
                     .map(HashSet::new)
                     .collect(Collectors.toList());
@@ -41,7 +43,7 @@ public class AvroGeneratorExtensions {
     }
 
     public String javaUnbox(SpecificCompiler delegate, Schema schema, boolean unboxNullToVoid) {
-        if (schema.getType() == Schema.Type.UNION) {
+        if (isUnionType(schema)) {
             return javaType(delegate, schema);
         }
         return delegate.javaUnbox(schema, unboxNullToVoid);
@@ -51,5 +53,18 @@ public class AvroGeneratorExtensions {
         return Optional.ofNullable(schema.getProp(PROP_NAME_JAVA_INTERFACE))
                 .map(p -> Arrays.asList(p.split("\\s,\\s")))
                 .orElse(List.of());
+    }
+
+    private boolean isUnionType(Schema schema) {
+        return schema.getType() == Schema.Type.UNION;
+    }
+
+    private boolean isOptionalType(Schema schema) {
+        if (isUnionType(schema)) {
+            var unionTypes = schema.getTypes();
+            return unionTypes.size() == 2 && unionTypes.stream().anyMatch(t -> t.getType() == Schema.Type.NULL);
+        } else {
+            return false;
+        }
     }
 }

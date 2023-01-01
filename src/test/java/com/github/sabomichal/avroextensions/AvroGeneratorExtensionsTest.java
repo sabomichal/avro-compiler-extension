@@ -20,29 +20,38 @@ public class AvroGeneratorExtensionsTest {
                 .setName("stateA")
                 .setValue(1)
                 .build();
-        var recordA = Record.newBuilder()
-                .setState(stateA)
-                .build();
 
         var stateB = StateB.newBuilder()
                 .setName("stateB")
                 .setValue(true)
                 .build();
-        var recordB = Record.newBuilder()
+
+        var recordA1 = RecordA.newBuilder()
+                .setState(stateA)
+                .setErrorType(null)
+                .build();
+
+        var recordA2 = RecordA.newBuilder()
                 .setState(stateB)
+                .setErrorTypeBuilder(Error.newBuilder().setMessage("message"))
+                .build();
+
+        var recordB = RecordB.newBuilder()
+                .setState(null)
+                .setErrorTypeBuilder(Error.newBuilder().setMessage("message"))
                 .build();
 
         // marshal
-        var datumWriter = new SpecificDatumWriter<>(Record.class);
+        var datumWriter = new SpecificDatumWriter<>(RecordA.class);
         var dataFileWriter = new DataFileWriter<>(datumWriter);
         var bos = new ByteArrayOutputStream();
-        dataFileWriter.create(recordA.getSchema(), bos);
-        dataFileWriter.append(recordA);
-        dataFileWriter.append(recordB);
+        dataFileWriter.create(recordA1.getSchema(), bos);
+        dataFileWriter.append(recordA1);
+        dataFileWriter.append(recordA2);
         dataFileWriter.close();
 
         // unmarshal
-        var datumReader = new SpecificDatumReader<>(Record.class);
+        var datumReader = new SpecificDatumReader<>(RecordA.class);
         var bis = new SeekableByteArrayInput(bos.toByteArray());
 
         var v = new PrintingVisitor();
@@ -50,12 +59,12 @@ public class AvroGeneratorExtensionsTest {
         try (var dataFileReader = new DataFileReader<>(bis, datumReader)) {
             assertTrue(dataFileReader.hasNext());
             var r1 = dataFileReader.next();
-            assertEquals(recordA, r1);
+            assertEquals(recordA1, r1);
             r1.getState().accept(v);
 
             assertTrue(dataFileReader.hasNext());
             var r2 = dataFileReader.next();
-            assertEquals(recordB, r2);
+            assertEquals(recordA2, r2);
             r2.getState().accept(v);
 
             assertFalse(dataFileReader.hasNext());

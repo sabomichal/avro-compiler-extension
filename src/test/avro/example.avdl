@@ -16,7 +16,18 @@ protocol Simple {
     boolean value;
   }
 
-  record Record {
+  @java-interface("com.github.sabomichal.avroextensions.ErrorState")
+  record Error {
+    string message;
+  }
+
+  record RecordA {
     union { StateA, StateB } state;
+    Error? errorType;
+  }
+
+  record RecordB {
+    union { null, StateA, StateB } state;
+    Error errorType;
   }
 }
