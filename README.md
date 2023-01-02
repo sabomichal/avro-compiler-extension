@@ -2,7 +2,8 @@
 ## avro-compiler-extension
 avro-compiler-extension is an Avro IDL to Java _SpecificCompiler_ extension adding custom IDL annotations, specifically:
 
-* @java-interface type annotation, making given record implementing the specified Java interface
+* **@java-interface** type annotation, making given record implement the specified Java interface
+* **@java-final** type annotation, making given record a final Java class
 * generated UNION types are no longer automatically generated with Java Object type, but the UNION types common Java interface  
 
 ### Avro version
