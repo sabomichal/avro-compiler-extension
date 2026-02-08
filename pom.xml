@@ -91,13 +91,6 @@
                     <version>3.6.0</version>
                     <executions>
                         <execution>
-                            <id>default-maven-version</id>
-                            <phase>initialize</phase>
-                            <goals>
-                                <goal>maven-version</goal>
-                            </goals>
-                        </execution>
-                        <execution>
                             <id>default-timestamp-property</id>
                             <phase>initialize</phase>
                             <goals>
