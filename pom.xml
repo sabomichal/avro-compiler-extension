@@ -8,11 +8,12 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.outputTimestamp>1</project.build.outputTimestamp>
 
         <maven.compiler.release>21</maven.compiler.release>
-        <maven.compiler.release.selftest>21</maven.compiler.release.selftest>
         <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
         <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
+
         <maven.test.skip>true</maven.test.skip>
 
         <avro.version>1.12.1</avro.version>
@@ -41,144 +42,70 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.14.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.4.2</version>
-                    <configuration>
-                        <archive>
-                            <index>true</index>
-                            <addMavenDescriptor>false</addMavenDescriptor>
-                            <compress>true</compress>
-                            <manifestEntries>
-                                <Build-Date>${buildNumber}</Build-Date>
-                                <Maven-Version>${maven.version}</Maven-Version>
-                            </manifestEntries>
-                        </archive>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>3.3.1</version>
-                    <configuration>
-                        <archive>
-                            <index>true</index>
-                            <addMavenDescriptor>false</addMavenDescriptor>
-                            <compress>true</compress>
-                            <manifestEntries>
-                                <Build-Date>${buildNumber}</Build-Date>
-                                <Maven-Version>${maven.version}</Maven-Version>
-                            </manifestEntries>
-                        </archive>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.3</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.6.0</version>
-                    <executions>
-                        <execution>
-                            <id>default-timestamp-property</id>
-                            <phase>initialize</phase>
-                            <goals>
-                                <goal>timestamp-property</goal>
-                            </goals>
-                            <configuration>
-                                <name>buildNumber</name>
-                                <locale>en</locale>
-                                <pattern>yyyy-MM-dd'T'HH:mm:ssZ</pattern>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>default-attach-artifact</id>
-                            <inherited>false</inherited>
-                            <phase>prepare-package</phase>
-                            <goals>
-                                <goal>attach-artifact</goal>
-                            </goals>
-                            <configuration>
-                                <artifacts>
-                                    <artifact>
-                                        <file>${basedir}/LICENSE.txt</file>
-                                        <classifier>license</classifier>
-                                        <type>txt</type>
-                                    </artifact>
-                                </artifacts>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>3.0.1</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.6.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.7.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.1.0</version>
                 <configuration>
-                    <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
+                    <passphrase>${gpg.passphrase}</passphrase>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
 
     <profiles>
         <profile>
-            <id>release-sign-artifacts</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <configuration>
-                            <passphrase>${gpg.passphrase}</passphrase>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
             <id>selftest</id>
             <properties>
                 <maven.test.skip>false</maven.test.skip>
-                <maven.compiler.release>${maven.compiler.release.selftest}</maven.compiler.release>
             </properties>
             <build>
                 <plugins>
@@ -234,7 +161,7 @@
     <licenses>
         <license>
             <name>The MIT License (MIT)</name>
-            <url>http://opensource.org/licenses/MIT</url>
+            <url>https://opensource.org/license/mit/</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -251,20 +178,6 @@
         <connection>scm:git:https://github.com/sabomichal/avro-compiler-extension.git</connection>
         <developerConnection>scm:git:git@github.com:sabomichal/avro-compiler-extension.git</developerConnection>
         <url>https://github.com/sabomichal/avro-compiler-extension</url>
-        <tag>v1.0</tag>
+        <tag>HEAD</tag>
     </scm>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>sonatype-snapshots</id>
-            <name>Sonatype snapshot repository</name>
-            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh-staging-api</id>
-            <name>Sonatype release repository</name>
-            <url>https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
-
 </project>
