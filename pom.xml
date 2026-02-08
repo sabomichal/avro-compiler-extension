@@ -3,7 +3,7 @@
 
     <groupId>com.github.sabomichal</groupId>
     <artifactId>avro-compiler-extension</artifactId>
-    <version>1.0</version>
+    <version>0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
