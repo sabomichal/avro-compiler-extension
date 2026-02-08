@@ -6,10 +6,10 @@ avro-compiler-extension is an Avro IDL to Java _SpecificCompiler_ extension addi
 * generated UNION types are no longer automatically generated with Java Object type, but the UNION types common Java interface  
 
 ### Avro version
-Extension is compatible with Avro 1.11.x
+Extension is compatible with Avro 1.12.x
 
 ### Java version
-Target Java versions is 11
+Target Java versions is 21
 
 ### Annotations provided by the extension
 The extension provides following custom annotations. Please see the examples for further information.
@@ -63,6 +63,9 @@ Maven users simply add the avro-compiler-extension extension as a dependency to 
 ```
 
 ### Release notes
+#### 1.0
+* Avro 1.12.x support
+* Java 21 min compatibility
 #### 0.1
 * first initial version
 
