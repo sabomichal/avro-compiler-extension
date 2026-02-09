@@ -1,4 +1,4 @@
-![Maven Central](https://img.shields.io/maven-central/v/com.github.sabomichal/avro-compiler-extension)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.sabomichal/avro-compiler-extension)](https://central.sonatype.com/artifact/com.github.sabomichal/avro-compiler-extension)
 ![Java CI with Maven](https://github.com/sabomichal/avro-compiler-extension/workflows/Java%20CI%20with%20Maven/badge.svg)
 ## avro-compiler-extension
 avro-compiler-extension is an Avro IDL to Java _SpecificCompiler_ extension adding custom IDL annotations, specifically:
