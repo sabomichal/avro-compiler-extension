@@ -56,7 +56,7 @@ Maven users simply add the avro-compiler-extension extension as a dependency to 
             </goals>
             <configuration>
                 <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
-                <templateDirectory>${project.basedir}/src/main/resources/velocity/</templateDirectory>
+                <templateDirectory>velocity/</templateDirectory>
                 <velocityToolsClassesNames>com.github.sabomichal.avroextensions.AvroGeneratorExtensions</velocityToolsClassesNames>
             </configuration>
         </execution>
