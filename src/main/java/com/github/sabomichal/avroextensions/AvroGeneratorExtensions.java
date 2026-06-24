@@ -5,7 +5,6 @@ import org.apache.avro.compiler.specific.SpecificCompiler;
 import org.apache.avro.specific.SpecificRecord;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class AvroGeneratorExtensions {
 
@@ -34,15 +33,32 @@ public class AvroGeneratorExtensions {
                     .filter(t -> t.getType() != Schema.Type.NULL)
                     .map(this::javaInterfaces)
                     .map(HashSet::new)
-                    .collect(Collectors.toList());
+                    .toList();
             // find common implementing types, if any
             var commons = interfaces.stream()
-                    .reduce(interfaces.get(0), (first, second) -> {
+                    .reduce(interfaces.getFirst(), (first, second) -> {
                         first.retainAll(second);
                         return first;
                     });
             if (!commons.isEmpty()) {
+
                 return SpecificCompiler.mangleTypeIdentifier(commons.iterator().next());
+            }
+        } else if (isArrayType(schema)) {
+            // get types of union and find implementing interfaces
+            var interfaces = schema.getElementType().getTypes().stream()
+                    .filter(t -> t.getType() != Schema.Type.NULL)
+                    .map(this::javaInterfaces)
+                    .map(HashSet::new)
+                    .toList();
+            // find common implementing types, if any
+            var commons = interfaces.stream()
+                    .reduce(interfaces.getFirst(), (first, second) -> {
+                        first.retainAll(second);
+                        return first;
+                    });
+            if (!commons.isEmpty()) {
+                return "java.util.List<" + SpecificCompiler.mangleTypeIdentifier(commons.iterator().next()) + ">";
             }
         }
         return delegate.javaType(schema);
@@ -50,6 +66,8 @@ public class AvroGeneratorExtensions {
 
     public String javaUnbox(SpecificCompiler delegate, Schema schema, boolean unboxNullToVoid) {
         if (isUnionType(schema)) {
+            return javaType(delegate, schema);
+        } else if (isArrayType(schema)) {
             return javaType(delegate, schema);
         }
         return delegate.javaUnbox(schema, unboxNullToVoid);
@@ -68,6 +86,10 @@ public class AvroGeneratorExtensions {
 
     private boolean isUnionType(Schema schema) {
         return schema.getType() == Schema.Type.UNION;
+    }
+
+    private boolean isArrayType(Schema schema) {
+        return schema.getType() == Schema.Type.ARRAY;
     }
 
     private boolean isOptionalType(Schema schema) {
