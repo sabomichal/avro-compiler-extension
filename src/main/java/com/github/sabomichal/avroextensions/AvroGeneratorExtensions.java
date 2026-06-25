@@ -28,35 +28,16 @@ public class AvroGeneratorExtensions {
     public String javaType(SpecificCompiler delegate, Schema schema) {
         // process all union types and skip optional types (defined as union of that type and NULL type)
         if (isUnionType(schema) && !isOptionalType(schema)) {
+            var types = schema.getTypes();
             // get types of union and find implementing interfaces
-            var interfaces = schema.getTypes().stream()
-                    .filter(t -> t.getType() != Schema.Type.NULL)
-                    .map(this::javaInterfaces)
-                    .map(HashSet::new)
-                    .toList();
-            // find common implementing types, if any
-            var commons = interfaces.stream()
-                    .reduce(interfaces.getFirst(), (first, second) -> {
-                        first.retainAll(second);
-                        return first;
-                    });
+            var commons = findCommonImplementingType(types);
             if (!commons.isEmpty()) {
-
                 return SpecificCompiler.mangleTypeIdentifier(commons.iterator().next());
             }
-        } else if (isArrayType(schema)) {
+        } else if (isArrayType(schema) && isUnionType(schema.getElementType())) {
+            var types = schema.getElementType().getTypes();
             // get types of union and find implementing interfaces
-            var interfaces = schema.getElementType().getTypes().stream()
-                    .filter(t -> t.getType() != Schema.Type.NULL)
-                    .map(this::javaInterfaces)
-                    .map(HashSet::new)
-                    .toList();
-            // find common implementing types, if any
-            var commons = interfaces.stream()
-                    .reduce(interfaces.getFirst(), (first, second) -> {
-                        first.retainAll(second);
-                        return first;
-                    });
+            var commons = findCommonImplementingType(types);
             if (!commons.isEmpty()) {
                 return "java.util.List<" + SpecificCompiler.mangleTypeIdentifier(commons.iterator().next()) + ">";
             }
@@ -64,18 +45,46 @@ public class AvroGeneratorExtensions {
         return delegate.javaType(schema);
     }
 
-    public String javaUnbox(SpecificCompiler delegate, Schema schema, boolean unboxNullToVoid) {
-        if (isUnionType(schema)) {
-            return javaType(delegate, schema);
-        } else if (isArrayType(schema)) {
-            return javaType(delegate, schema);
+    private HashSet<String> findCommonImplementingType(List<Schema> types) {
+        var interfaces = types.stream()
+                .filter(t -> t.getType() != Schema.Type.NULL)
+                .map(this::javaInterfaces)
+                .map(HashSet::new)
+                .toList();
+        if (interfaces.isEmpty()) {
+            return new HashSet<>();
         }
-        return delegate.javaUnbox(schema, unboxNullToVoid);
+        // find common implementing types, if any
+        return interfaces.stream()
+                .reduce(interfaces.getFirst(), (first, second) -> {
+                    first.retainAll(second);
+                    return first;
+                });
+    }
+
+    public String javaUnbox(SpecificCompiler delegate, Schema schema, boolean unboxNullToVoid) {
+        switch (schema.getType()) {
+            case INT:
+            case LONG:
+            case FLOAT:
+            case DOUBLE:
+            case BOOLEAN:
+                // let the delegate handle unboxing of primitive types
+                return delegate.javaUnbox(schema, unboxNullToVoid);
+            case NULL:
+                if (unboxNullToVoid) {
+                    return delegate.javaUnbox(schema, true);
+                }
+                // fall through
+            default:
+                // not unboxed: cover the default with our javaType, not the delegate one
+                return javaType(delegate, schema);
+        }
     }
 
     private List<String> javaInterfaces(Schema schema) {
         return Optional.ofNullable(schema.getProp(PROP_NAME_JAVA_INTERFACE))
-                .map(p -> Arrays.asList(p.split("\\s,\\s")))
+                .map(p -> Arrays.asList(p.split("\\s*,\\s*")))
                 .orElse(List.of());
     }
 

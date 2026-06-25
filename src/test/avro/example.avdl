@@ -31,6 +31,8 @@ protocol Simple {
   record RecordB {
     union { null, StateA, StateB } state;
     array<union { StateA, StateB }> states = [];
+    array<string> tags = [];
+    array<MessagePayload> payloads = [];
     MessagePayload payload;
   }
 }
