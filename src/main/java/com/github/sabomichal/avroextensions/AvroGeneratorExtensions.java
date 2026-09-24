@@ -45,16 +45,17 @@ public class AvroGeneratorExtensions {
         return delegate.javaType(schema);
     }
 
-    private HashSet<String> findCommonImplementingType(List<Schema> types) {
+    private LinkedHashSet<String> findCommonImplementingType(List<Schema> types) {
         var interfaces = types.stream()
                 .filter(t -> t.getType() != Schema.Type.NULL)
                 .map(this::javaInterfaces)
-                .map(HashSet::new)
+                .map(LinkedHashSet::new)
                 .toList();
         if (interfaces.isEmpty()) {
-            return new HashSet<>();
+            return new LinkedHashSet<>();
         }
-        // find common implementing types, if any
+        // find common implementing types, if any; keeps the declaration order of the first member,
+        // so with several shared interfaces the first declared one is used
         return interfaces.stream()
                 .reduce(interfaces.getFirst(), (first, second) -> {
                     first.retainAll(second);

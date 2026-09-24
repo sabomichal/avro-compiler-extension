@@ -1,6 +1,8 @@
 package com.github.sabomichal.avroextensions;
 
 import com.example.*;
+import org.apache.avro.Schema;
+import org.apache.avro.compiler.specific.SpecificCompiler;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.file.SeekableByteArrayInput;
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -89,6 +92,24 @@ public class AvroGeneratorExtensionsTest {
                 .build();
         Optional<State> expectedB2 = Optional.of(state);
         assertEquals(expectedB2, recordB2.getState());
+    }
+
+    @Test
+    public void testSeveralSharedInterfacesPickFirstDeclared() {
+        var a = record("A", "com.example.Zeta, com.example.Alpha");
+        var b = record("B", "com.example.Alpha, com.example.Zeta");
+        var union = Schema.createUnion(a, b);
+        var extensions = new AvroGeneratorExtensions();
+        var compiler = new SpecificCompiler(union);
+
+        assertEquals("com.example.Zeta", extensions.javaType(compiler, union));
+        assertEquals("java.util.List<com.example.Zeta>", extensions.javaType(compiler, Schema.createArray(union)));
+    }
+
+    private static Schema record(String name, String interfaces) {
+        var schema = Schema.createRecord(name, null, "com.example", false, List.of());
+        schema.addProp(AvroGeneratorExtensions.PROP_NAME_JAVA_INTERFACE, interfaces);
+        return schema;
     }
 
     private static class PrintingVisitor implements Visitor {
