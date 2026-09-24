@@ -28,7 +28,8 @@ Unions without a shared interface are generated as stock Avro does.
 
 ## Setup
 
-The extension version matches the Avro version it targets (extension `1.12.2` = Avro `1.12.2`).
+The extension version matches the Avro version it targets (extension `1.12.2` = Avro `1.12.2`);
+a `-N` suffix marks fix releases for the same Avro version (`1.12.2-1`).
 
 ### Maven
 
@@ -41,7 +42,7 @@ The extension version matches the Avro version it targets (extension `1.12.2` = 
         <dependency>
             <groupId>com.github.sabomichal</groupId>
             <artifactId>avro-compiler-extension</artifactId>
-            <version>1.12.2</version>
+            <version>1.12.2-1</version>
         </dependency>
     </dependencies>
     <configuration>
@@ -62,7 +63,7 @@ buildscript {
     repositories { mavenCentral() }
     dependencies {
         classpath "org.apache.avro:avro-compiler:1.12.2"
-        classpath "com.github.sabomichal:avro-compiler-extension:1.12.2"
+        classpath "com.github.sabomichal:avro-compiler-extension:1.12.2-1"
     }
 }
 
