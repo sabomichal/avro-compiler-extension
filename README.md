@@ -11,7 +11,7 @@ exhaustiveness at compile time.
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.sabomichal/avro-compiler-extension?logo=apachemaven&label=Maven%20Central)](https://central.sonatype.com/artifact/com.github.sabomichal/avro-compiler-extension)
 [![Java CI with Maven](https://github.com/sabomichal/avro-compiler-extension/actions/workflows/maven.yml/badge.svg)](https://github.com/sabomichal/avro-compiler-extension/actions/workflows/maven.yml)
 [![Java](https://img.shields.io/badge/Java-21%2B-orange?logo=openjdk&logoColor=white)](https://docs.oracle.com/en/java/javase/21/)
-[![Apache Avro](https://img.shields.io/badge/Apache%20Avro-1.12.x-1BA0E2?logo=apache&logoColor=white)](https://avro.apache.org/)
+[![Apache Avro](https://img.shields.io/badge/Apache%20Avro-1.12.2-1BA0E2?logo=apache&logoColor=white)](https://avro.apache.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.txt)
 
 [Why](#why) · [Quick start](#quick-start) · [Example](#example) · [Type mapping](#type-mapping) · [Limitations](#limitations) · [Releases](https://github.com/sabomichal/avro-compiler-extension/releases)
@@ -74,18 +74,23 @@ Two things have to be wired into the Avro compiler:
    and the replacement `velocity/*.vm` templates;
 2. `templateDirectory = velocity/` plus the `AvroGeneratorExtensions` tool class.
 
+> [!NOTE]
+> **Use the extension version that matches your Avro version.** Since 1.12.2 the extension is
+> versioned after the Avro release its templates are taken from — extension `1.12.2` carries
+> the Avro `1.12.2` templates. Earlier releases (`0.1`–`1.2`) predate this scheme.
+
 ### Maven
 
 ```xml
 <plugin>
     <groupId>org.apache.avro</groupId>
     <artifactId>avro-maven-plugin</artifactId>
-    <version>1.12.1</version>
+    <version>1.12.2</version>
     <dependencies>
         <dependency>
             <groupId>com.github.sabomichal</groupId>
             <artifactId>avro-compiler-extension</artifactId>
-            <version>1.2</version>
+            <version>1.12.2</version>
         </dependency>
     </dependencies>
     <executions>
@@ -120,8 +125,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "org.apache.avro:avro-compiler:1.12.1"   // required, see note
-        classpath "com.github.sabomichal:avro-compiler-extension:1.2"
+        classpath "org.apache.avro:avro-compiler:1.12.2"   // required, see note
+        classpath "com.github.sabomichal:avro-compiler-extension:1.12.2"
     }
 }
 
@@ -141,10 +146,31 @@ avro {
 ```
 
 > [!IMPORTANT]
-> **Pin `avro-compiler` to `1.12.x`.** gradle-avro-plugin ships with an older Avro whose
-> `SpecificCompiler` lacks methods the templates call. Without the pin, generation fails with
-> `SpecificCompiler does not contain method getSchemaParentClass`.
-> Maven needs no pin — `avro-maven-plugin` 1.12.1 already brings Avro 1.12.1.
+> **Pin `avro-compiler` to the extension's version.** gradle-avro-plugin ships with an older
+> Avro whose `SpecificCompiler` lacks methods the templates call. Without the pin, generation
+> fails with `SpecificCompiler does not contain method getSchemaParentClass`.
+> Maven needs no pin — `avro-maven-plugin` 1.12.2 already brings Avro 1.12.2.
+
+### Reading data with Avro 1.12.2+
+
+Avro 1.12.2 only instantiates classes from packages you explicitly trust. This is Avro's own
+hardening ([release notes](https://github.com/apache/avro/releases/tag/release-1.12.2),
+AVRO-4189) and applies to any generated code, not only code from this extension. Without it,
+reading records fails with:
+
+```
+java.lang.SecurityException: Forbidden com.example.StateA! This class is not trusted to be included in Avro schemas.
+```
+
+List the packages of your generated classes in a system property:
+
+```
+-Dorg.apache.avro.SERIALIZABLE_PACKAGES=com.example
+```
+
+The property is read once, when Avro is loaded, so set it on the JVM command line rather than
+with `System.setProperty` later. Alternatively, register the packages in code with
+`org.apache.avro.util.ClassSecurityValidator`.
 
 <details>
 <summary><b>Troubleshooting</b></summary>
@@ -156,6 +182,7 @@ avro {
 | `unable to load velocity tool class …` | The extension jar isn't on the compiler's classpath. In Gradle it must be a `buildscript` `classpath` dependency — a regular `implementation`/`compileOnly` dependency is invisible to the plugin. |
 | Unions are still generated as `Object` | `templateDirectory` is missing. The tool class alone does nothing; only the bundled templates call it. |
 | `does not contain method getSchemaParentClass` | Avro older than 1.12 on the compiler classpath — see the pin above. |
+| `SecurityException: Forbidden … not trusted to be included in Avro schemas` | Avro 1.12.2+ class allowlist — see [Reading data with Avro 1.12.2+](#reading-data-with-avro-1122). |
 
 </details>
 
