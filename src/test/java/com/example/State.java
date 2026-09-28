@@ -2,7 +2,7 @@ package com.example;
 
 import java.util.Optional;
 
-public sealed interface State permits StateA, StateB {
+public sealed interface State permits StateA, StateB, StateC {
 
     default <T extends State> Optional<T> getAs(Class<T> clazz) {
         return clazz.isInstance(this) ? Optional.of(clazz.cast(this)) : Optional.empty();
@@ -12,6 +12,8 @@ public sealed interface State permits StateA, StateB {
         if (this instanceof StateA s) {
             visitor.visit(s);
         } else if (this instanceof StateB s) {
+            visitor.visit(s);
+        } else if (this instanceof StateC s) {
             visitor.visit(s);
         }
     }

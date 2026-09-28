@@ -18,6 +18,14 @@ protocol Simple {
     boolean value;
   }
 
+  /* Purposefully declare delimited garbage */
+  @java-final("")
+  @java-interface("com.example.State, com.example.RecursiveTypeBound<com.example.StateC>,   , ,,")
+  record StateC {
+    string name;
+    boolean value;
+  }
+
   @java-interface("com.example.Payload")
   record MessagePayload {
     string message;

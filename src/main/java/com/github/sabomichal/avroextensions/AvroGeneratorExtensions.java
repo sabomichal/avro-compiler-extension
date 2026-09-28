@@ -5,6 +5,8 @@ import org.apache.avro.compiler.specific.SpecificCompiler;
 import org.apache.avro.specific.SpecificRecord;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AvroGeneratorExtensions {
 
@@ -45,19 +47,18 @@ public class AvroGeneratorExtensions {
         return delegate.javaType(schema);
     }
 
-    private LinkedHashSet<String> findCommonImplementingType(List<Schema> types) {
-        var interfaces = types.stream()
+    private Set<String> findCommonImplementingType(List<Schema> types) {
+        final var interfaces = types.stream()
                 .filter(t -> t.getType() != Schema.Type.NULL)
                 .map(this::javaInterfaces)
-                .map(LinkedHashSet::new)
-                .toList();
+                .collect(Collectors.toList());
         if (interfaces.isEmpty()) {
-            return new LinkedHashSet<>();
+            return Collections.emptySet();
         }
         // find common implementing types, if any; keeps the declaration order of the first member,
         // so with several shared interfaces the first declared one is used
         return interfaces.stream()
-                .reduce(interfaces.getFirst(), (first, second) -> {
+                .reduce(interfaces.iterator().next(), (first, second) -> {
                     first.retainAll(second);
                     return first;
                 });
@@ -83,10 +84,19 @@ public class AvroGeneratorExtensions {
         }
     }
 
-    private List<String> javaInterfaces(Schema schema) {
-        return Optional.ofNullable(schema.getProp(PROP_NAME_JAVA_INTERFACE))
-                .map(p -> Arrays.asList(p.split("\\s*,\\s*")))
-                .orElse(List.of());
+    private Set<String> javaInterfaces(Schema schema) {
+        final var it = Optional.ofNullable(schema.getProp(PROP_NAME_JAVA_INTERFACE))
+            .stream()
+            .flatMap(p -> Stream.of(p.split("\\s*,\\s*")))
+            .iterator();
+        if (!it.hasNext()) {
+            return Collections.emptySet();
+        }
+        final var set = new LinkedHashSet<String>();
+        do {
+            set.add(it.next());
+        } while (it.hasNext());
+        return set;
     }
 
     private boolean javaFinal(Schema schema) {
