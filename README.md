@@ -46,7 +46,7 @@ The extension jar is compiled to Java 11 bytecode, the same level as the upstrea
         <dependency>
             <groupId>com.github.sabomichal</groupId>
             <artifactId>avro-compiler-extension</artifactId>
-            <version>1.12.2-1</version>
+            <version>1.12.2-2</version>
         </dependency>
     </dependencies>
     <configuration>
@@ -67,7 +67,7 @@ buildscript {
     repositories { mavenCentral() }
     dependencies {
         classpath "org.apache.avro:avro-compiler:1.12.2"
-        classpath "com.github.sabomichal:avro-compiler-extension:1.12.2-1"
+        classpath "com.github.sabomichal:avro-compiler-extension:1.12.2-2"
     }
 }
 
