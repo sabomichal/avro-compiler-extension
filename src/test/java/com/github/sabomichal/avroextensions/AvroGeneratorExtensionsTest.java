@@ -95,6 +95,19 @@ public class AvroGeneratorExtensionsTest {
     }
 
     @Test
+    public void testRecursiveTypeBound() {
+        assertSame(
+            StateC.class,
+            StateC.newBuilder()
+                .setName("state")
+                .setValue(false)
+                .build()
+                .self()
+                .getClass()
+        );
+    }
+
+    @Test
     public void testSeveralSharedInterfacesPickFirstDeclared() {
         var a = record("A", "com.example.Zeta, com.example.Alpha");
         var b = record("B", "com.example.Alpha, com.example.Zeta");
@@ -122,6 +135,11 @@ public class AvroGeneratorExtensionsTest {
         @Override
         public void visit(StateB state) {
             System.out.println("State B");
+        }
+
+        @Override
+        public void visit(StateC state) {
+            System.out.println("State C");
         }
     }
 }

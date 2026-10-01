@@ -3,8 +3,9 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.sabomichal/avro-compiler-extension?label=Maven%20Central)](https://central.sonatype.com/artifact/com.github.sabomichal/avro-compiler-extension)
 [![Build](https://github.com/sabomichal/avro-compiler-extension/actions/workflows/maven.yml/badge.svg)](https://github.com/sabomichal/avro-compiler-extension/actions/workflows/maven.yml)
 
-Type-safe Avro unions for Java 21+. Union fields get a shared interface type instead of
-`Object`, so a `switch` over them is checked for exhaustiveness at compile time.
+Type-safe Avro unions for projects on Java 11+. Union fields get a shared interface type
+instead of `Object`. On Java 21+ you can make that interface `sealed`, forcing compiler
+to do exhaustiveness check at compile time in `switch` expressions.
 
 ```diff
 - Object state = record.getState();
@@ -30,6 +31,9 @@ Unions without a shared interface are generated as stock Avro does.
 
 The extension version matches the Avro version it targets (extension `1.12.2` = Avro `1.12.2`);
 a `-N` suffix marks fix releases for the same Avro version (`1.12.2-1`).
+
+The extension jar is compiled to Java 11 bytecode, the same level as the upstream
+`avro-maven-plugin`, so it runs on any build JVM that plugin supports.
 
 ### Maven
 

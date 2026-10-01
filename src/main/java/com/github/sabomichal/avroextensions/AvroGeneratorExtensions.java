@@ -5,6 +5,8 @@ import org.apache.avro.compiler.specific.SpecificCompiler;
 import org.apache.avro.specific.SpecificRecord;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AvroGeneratorExtensions {
 
@@ -14,11 +16,9 @@ public class AvroGeneratorExtensions {
     public static final String DEFAULT_INTERFACE = SpecificRecord.class.getName();
 
     public String recordImplements(Schema schema) {
-        var customInterfaces = javaInterfaces(schema);
-        var interfaces = new ArrayList<String>(1 + customInterfaces.size());
-        interfaces.add(DEFAULT_INTERFACE);
-        interfaces.addAll(customInterfaces);
-        return String.join(", ", interfaces);
+        return Stream
+            .concat(Stream.of(DEFAULT_INTERFACE), javaInterfaces(schema))
+            .collect(Collectors.joining(", "));
     }
 
     public boolean recordFinal(Schema schema) {
@@ -45,19 +45,18 @@ public class AvroGeneratorExtensions {
         return delegate.javaType(schema);
     }
 
-    private LinkedHashSet<String> findCommonImplementingType(List<Schema> types) {
-        var interfaces = types.stream()
+    private Set<String> findCommonImplementingType(List<Schema> types) {
+        final var interfaces = types.stream()
                 .filter(t -> t.getType() != Schema.Type.NULL)
-                .map(this::javaInterfaces)
-                .map(LinkedHashSet::new)
-                .toList();
+                .map(schema -> javaInterfaces(schema).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .collect(Collectors.toList());
         if (interfaces.isEmpty()) {
-            return new LinkedHashSet<>();
+            return Collections.emptySet();
         }
         // find common implementing types, if any; keeps the declaration order of the first member,
         // so with several shared interfaces the first declared one is used
         return interfaces.stream()
-                .reduce(interfaces.getFirst(), (first, second) -> {
+                .reduce(interfaces.iterator().next(), (first, second) -> {
                     first.retainAll(second);
                     return first;
                 });
@@ -83,10 +82,10 @@ public class AvroGeneratorExtensions {
         }
     }
 
-    private List<String> javaInterfaces(Schema schema) {
+    private Stream<String> javaInterfaces(Schema schema) {
         return Optional.ofNullable(schema.getProp(PROP_NAME_JAVA_INTERFACE))
-                .map(p -> Arrays.asList(p.split("\\s*,\\s*")))
-                .orElse(List.of());
+                .stream()
+                .flatMap(p -> Stream.of(p.split("\\s*,\\s*")));
     }
 
     private boolean javaFinal(Schema schema) {

@@ -10,7 +10,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.outputTimestamp>1980-01-01T00:00:02Z</project.build.outputTimestamp>
 
-        <maven.compiler.release>21</maven.compiler.release>
+        <!-- the extension itself runs on 11, the self test sources seal interfaces and need 17 at the least -->
+        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.testRelease>21</maven.compiler.testRelease>
         <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
         <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
 
@@ -141,9 +143,6 @@
                                     <goal>idl-protocol</goal>
                                 </goals>
                                 <configuration>
-                                    <sourceDirectory>${project.basedir}/src/test/avro/</sourceDirectory>
-                                    <outputDirectory>${project.build.directory}/generated-test-sources/avro
-                                    </outputDirectory>
                                     <templateDirectory>${project.basedir}/src/main/resources/velocity/
                                     </templateDirectory>
                                     <stringType>String</stringType>
