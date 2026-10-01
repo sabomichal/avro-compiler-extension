@@ -16,11 +16,9 @@ public class AvroGeneratorExtensions {
     public static final String DEFAULT_INTERFACE = SpecificRecord.class.getName();
 
     public String recordImplements(Schema schema) {
-        var customInterfaces = javaInterfaces(schema);
-        var interfaces = new ArrayList<String>(1 + customInterfaces.size());
-        interfaces.add(DEFAULT_INTERFACE);
-        interfaces.addAll(customInterfaces);
-        return String.join(", ", interfaces);
+        return Stream
+            .concat(Stream.of(DEFAULT_INTERFACE), javaInterfaces(schema))
+            .collect(Collectors.joining(", "));
     }
 
     public boolean recordFinal(Schema schema) {
@@ -50,7 +48,7 @@ public class AvroGeneratorExtensions {
     private Set<String> findCommonImplementingType(List<Schema> types) {
         final var interfaces = types.stream()
                 .filter(t -> t.getType() != Schema.Type.NULL)
-                .map(this::javaInterfaces)
+                .map(schema -> javaInterfaces(schema).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .collect(Collectors.toList());
         if (interfaces.isEmpty()) {
             return Collections.emptySet();
@@ -84,19 +82,10 @@ public class AvroGeneratorExtensions {
         }
     }
 
-    private Set<String> javaInterfaces(Schema schema) {
-        final var it = Optional.ofNullable(schema.getProp(PROP_NAME_JAVA_INTERFACE))
-            .stream()
-            .flatMap(p -> Stream.of(p.split("\\s*,\\s*")))
-            .iterator();
-        if (!it.hasNext()) {
-            return Collections.emptySet();
-        }
-        final var set = new LinkedHashSet<String>();
-        do {
-            set.add(it.next());
-        } while (it.hasNext());
-        return set;
+    private Stream<String> javaInterfaces(Schema schema) {
+        return Optional.ofNullable(schema.getProp(PROP_NAME_JAVA_INTERFACE))
+                .stream()
+                .flatMap(p -> Stream.of(p.split("\\s*,\\s*")));
     }
 
     private boolean javaFinal(Schema schema) {
